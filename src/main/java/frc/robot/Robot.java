@@ -101,9 +101,6 @@ public class Robot extends LoggedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
-
-        // stop all subsystems
-        RobotContainer.getExampleSubsystem().stop();
     }
 
     @Override
