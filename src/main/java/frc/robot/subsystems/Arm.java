@@ -2,34 +2,47 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.system.plant.DCMotor;
+
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Simulation;
 
 public class Arm extends SubsystemBase {
     private double motorPercent = 0.0;
-    private double angleRad = 0.0;
-    private double velocityRadPerSec = 0.0;
 
-    private final double DT = 0.02;
-    private final double MAX_ACCEL = 9.0;
-    private final double GRAVITY_COS_APPROX = 4.5;
+    // Simulation parameters
+    private static final double kGearRatio = 48.0;
+    private static final double kArmMOI = 0.5; // Moment of Inertia in kg * m^2
+    private static final double kArmLengthMeters = 0.6;
+    private static final double kMinAngleRad = Math.toRadians(-360.0); // Min angle (e.g., straight down)
+    private static final double kMaxAngleRad = Math.toRadians(360.0);  // Max angle
+    private static final boolean kSimulateGravity = true;
+
+    private final SingleJointedArmSim m_armSim = new SingleJointedArmSim(
+        DCMotor.getKrakenX60(1),
+        kGearRatio,
+        kArmMOI,
+        kArmLengthMeters,
+        kMinAngleRad,
+        kMaxAngleRad,
+        kSimulateGravity,
+        0.0
+    );
 
     public Rotation2d getAngle() {
-        return Rotation2d.fromRadians(angleRad);
+        return Rotation2d.fromRadians(m_armSim.getAngleRads());
     }
 
     public void setPercent(double percent) {
-        motorPercent = MathUtil.clamp(percent, -1.0, 1.0);
+        this.motorPercent = MathUtil.clamp(percent, -1.0, 1.0);
     }
 
     @Override
     public void periodic() {
-        // Run physics approximation (Motor torque vs Gravity torque)
-        double acceleration = (motorPercent * MAX_ACCEL) - (GRAVITY_COS_APPROX * Math.cos(angleRad));
-        velocityRadPerSec = (velocityRadPerSec + acceleration * DT) * 0.99;
-        angleRad = angleRad + (velocityRadPerSec * DT);
+        m_armSim.setInputVoltage(motorPercent * 12.0);
+        m_armSim.update(0.02);
 
-        // Sync with the visual Canvas
-        Simulation.updateArmVisual(angleRad);
+        Simulation.updateArmVisual(m_armSim.getAngleRads());
     }
 }
