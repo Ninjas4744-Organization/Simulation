@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
@@ -45,6 +47,7 @@ public class RobotContainer {
 
         Simulation.setup();
         configureBindings();
+        
     }
 
     public static Elevator getElevator() {
@@ -68,24 +71,31 @@ public class RobotContainer {
     public static SwerveSubsystem getSwerveSubsystem() {
         return swerveSubsystem;
     }
-
+    double errorSum = 0;
+    double lastTimeStamp = 0;
+    double kP = 1;
+    double kI = 0.2551020408163265;
+    double kD = 0;
+    double kIZone = 0.5;
     private void configureBindings() {
-        driverController.triangle().whileTrue(Commands.startEnd(() -> elevator.setPercent(0.5), () -> elevator.setPercent(0)));
+        driverController.triangle().toggleOnTrue(Commands.startRun(
+                () -> {
+                    errorSum = 0;
+                    lastTimeStamp = Timer.getFPGATimestamp();
 
-        driverController.circle().whileTrue(Commands.startEnd(() -> arm.setPercent(0.5), () -> arm.setPercent(0)));
-        driverController.square().whileTrue(Commands.startEnd(() -> arm.setPercent(-0.5), () -> arm.setPercent(0)));
+                },
+                () -> {
+            double error = 0.8 - elevator.getHeight();
+            double dT = Timer.getFPGATimestamp() - lastTimeStamp;
+            if (error < kIZone) {
+                errorSum += error * dT;
+            }
+            double output = error * kP;
+            double outputSpeed = output + kI * errorSum;
+            elevator.setPercent(outputSpeed);
+            lastTimeStamp = Timer.getFPGATimestamp();
+                    SmartDashboard.putNumber("Elevator/Error", error);
 
-        driverController.R1().whileTrue(Commands.startEnd(() -> turret.setPercent(-0.5), () -> turret.setPercent(0)));
-        driverController.L1().whileTrue(Commands.startEnd(() -> turret.setPercent(0.5), () -> turret.setPercent(0)));
-
-        driverController.L2().whileTrue(Commands.startEnd(() -> hood.setPercent(0.5), () -> hood.setPercent(0)));
-
-        driverController.R2().whileTrue(Commands.startEnd(() -> {
-            shooter.setPercent(0.5);
-            indexer.setPercent(1);
-        }, () -> {
-            shooter.setPercent(0);
-            indexer.setPercent(0);
         }));
     }
 
