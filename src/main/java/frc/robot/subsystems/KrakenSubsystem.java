@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VoltageOut;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class KrakenSubsystem extends SubsystemBase {
 
@@ -58,4 +59,18 @@ public class KrakenSubsystem extends SubsystemBase {
         // ג. שליחת ההגדרות למנוע הפיזי
         m_motor.getConfigurator().apply(config);
     }
+
+    @Override
+    public void periodic() {
+        // קריאת נתונים בזמן אמת מהמנוע (Phoenix 6)
+        double currentPosition = m_motor.getPosition().getValueAsDouble();
+        double currentVelocity = m_motor.getVelocity().getValueAsDouble();
+        double statorCurrent = m_motor.getStatorCurrent().getValueAsDouble();
+
+        // שליחת הנתונים ל-SmartDashboard
+        SmartDashboard.putNumber("Kraken/Position", currentPosition);
+        SmartDashboard.putNumber("Kraken/Velocity", currentVelocity);
+        SmartDashboard.putNumber("Kraken/Stator Current", statorCurrent);
+    }
+
 }

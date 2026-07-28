@@ -100,7 +100,7 @@ public class RobotContainer {
 
         }));
     }
-// דוגמה: כשלוחצים על כפתור A בשלט, המנוע ירוץ ב-6 וולט. כשעוזבים - הוא יעצור אוטומטית!
+// דוגמה: כשלוחצים על כפתור cross בשלט, המנוע ירוץ ב-50% כוח. כשעוזבים - הוא יעצור אוטומטית!
 
     public void controllerPeriodic() {
         driverController.periodic();
