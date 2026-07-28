@@ -77,7 +77,9 @@ public class RobotContainer {
     double kI = 0.2551020408163265;
     double kD = 0;
     double kIZone = 0.5;
+    private final KrakenSubsystem m_krakenSubsystem = new KrakenSubsystem();
     private void configureBindings() {
+        driverController.cross().whileTrue(m_krakenSubsystem.runSpeedCommand(0.5));
         driverController.triangle().toggleOnTrue(Commands.startRun(
                 () -> {
                     errorSum = 0;
@@ -98,6 +100,7 @@ public class RobotContainer {
 
         }));
     }
+// דוגמה: כשלוחצים על כפתור cross בשלט, המנוע ירוץ ב-50% כוח. כשעוזבים - הוא יעצור אוטומטית!
 
     public void controllerPeriodic() {
         driverController.periodic();
