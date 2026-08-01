@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -71,35 +72,17 @@ public class RobotContainer {
     public static SwerveSubsystem getSwerveSubsystem() {
         return swerveSubsystem;
     }
-    double errorSum = 0;
-    double lastTimeStamp = 0;
-    double kP = 1;
-    double kI = 0.2551020408163265;
-    double kD = 0;
     double kIZone = 0.5;
+
     private final KrakenSubsystem m_krakenSubsystem = new KrakenSubsystem();
     private void configureBindings() {
         driverController.cross().whileTrue(m_krakenSubsystem.runSpeedCommand(0.5));
-        driverController.triangle().toggleOnTrue(Commands.startRun(
-                () -> {
-                    errorSum = 0;
-                    lastTimeStamp = Timer.getFPGATimestamp();
 
-                },
-                () -> {
-            double error = 0.8 - elevator.getHeight();
-            double dT = Timer.getFPGATimestamp() - lastTimeStamp;
-            if (error < kIZone) {
-                errorSum += error * dT;
-            }
-            double output = error * kP;
-            double outputSpeed = output + kI * errorSum;
-            elevator.setPercent(outputSpeed);
-            lastTimeStamp = Timer.getFPGATimestamp();
-                    SmartDashboard.putNumber("Elevator/Error", error);
 
-        }));
+
+        driverController.triangle().toggleOnTrue(elevator.setHeight(0.8));
     }
+
 // דוגמה: כשלוחצים על כפתור cross בשלט, המנוע ירוץ ב-50% כוח. כשעוזבים - הוא יעצור אוטומטית!
 
     public void controllerPeriodic() {
@@ -109,6 +92,7 @@ public class RobotContainer {
 
     public void periodic() {
         Simulation.periodic();
+        elevator.logError();
     }
 
     public Command getAutonomousCommand() {

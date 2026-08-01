@@ -1,9 +1,13 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Simulation;
 
@@ -31,7 +35,19 @@ public class Elevator extends SubsystemBase {
     public double getHeight() {
         return m_elevatorSim.getPositionMeters();
     }
+    PIDController pid = new PIDController(7.5, 0.01, 0.5);
 
+    public Command setHeight(double height) {
+
+        return Commands.run(() -> {
+            System.out.println("print hello world");
+            setPercent(pid.calculate(getHeight(), height));
+        });
+    }
+    public void logError() {
+        SmartDashboard.putNumber("Elevator/error", pid.getError() );
+        SmartDashboard.putNumber("Elevator/ErrorRate", pid.getErrorDerivative());
+    }
     public void setPercent(double percent) {
         this.motorPercent = MathUtil.clamp(percent, -1.0, 1.0);
     }
