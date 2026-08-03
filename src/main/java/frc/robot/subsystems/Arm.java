@@ -1,10 +1,13 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Simulation;
 
@@ -30,6 +33,13 @@ public class Arm extends SubsystemBase {
         0.0
     );
 
+    public Arm() {
+        pidArm.setIZone(4);
+    }
+
+    PIDController pidArm = new PIDController(1, 0.2,0);
+
+
     public Rotation2d getAngle() {
         return Rotation2d.fromRadians(m_armSim.getAngleRads());
     }
@@ -38,11 +48,18 @@ public class Arm extends SubsystemBase {
         this.motorPercent = MathUtil.clamp(percent, -1.0, 1.0);
     }
 
+    public Command setAngle(Rotation2d angle) {
+        return Commands.run(() -> {
+           // System.out.println("Arm worked");
+            setPercent(pidArm.calculate(getAngle().getRadians(), angle.getRadians()));
+        });
+    }
     @Override
     public void periodic() {
         m_armSim.setInputVoltage(motorPercent * 12.0);
         m_armSim.update(0.02);
 
         Simulation.updateArmVisual(m_armSim.getAngleRads());
+
     }
 }

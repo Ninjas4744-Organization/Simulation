@@ -38,9 +38,8 @@ public class Elevator extends SubsystemBase {
     PIDController pid = new PIDController(7.5, 0.01, 0.5);
 
     public Command setHeight(double height) {
-
         return Commands.run(() -> {
-            System.out.println("print hello world");
+            //System.out.println("Elevator worked");
             setPercent(pid.calculate(getHeight(), height));
         });
     }

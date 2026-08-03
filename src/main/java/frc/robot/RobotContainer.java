@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -72,16 +73,31 @@ public class RobotContainer {
     public static SwerveSubsystem getSwerveSubsystem() {
         return swerveSubsystem;
     }
-    double kIZone = 0.5;
-
     private final KrakenSubsystem m_krakenSubsystem = new KrakenSubsystem();
     private void configureBindings() {
-        driverController.cross().whileTrue(m_krakenSubsystem.runSpeedCommand(0.5));
+        driverController.triangle().whileTrue(m_krakenSubsystem.runSpeedCommand(0.5));
+        // Runs highGoalCommand if isFarAway() is true, otherwise runs lowGoalCommand
+
+
+        driverController.cross().onTrue(Commands.either(
+                Commands.sequence(
+                        Commands.startRun( () ->
+                        elevator.setHeight(0.8),
+                                () -> {
+                                    if (elevator.getHeight() > 0.4) {
+                                        arm.setAngle(Rotation2d.fromDegrees(30.0));
+                                    }
+                                },
+                                elevator, arm
+                        );
 
 
 
-        driverController.triangle().toggleOnTrue(elevator.setHeight(0.8));
+
+
+
     }
+
 
 // דוגמה: כשלוחצים על כפתור cross בשלט, המנוע ירוץ ב-50% כוח. כשעוזבים - הוא יעצור אוטומטית!
 
@@ -93,6 +109,7 @@ public class RobotContainer {
     public void periodic() {
         Simulation.periodic();
         elevator.logError();
+        SmartDashboard.putNumber("Arm/angle", arm.getAngle().getDegrees());
     }
 
     public Command getAutonomousCommand() {
