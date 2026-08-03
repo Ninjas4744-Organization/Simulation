@@ -52,8 +52,9 @@ public class Arm extends SubsystemBase {
         return Commands.run(() -> {
            // System.out.println("Arm worked");
             setPercent(pidArm.calculate(getAngle().getRadians(), angle.getRadians()));
-        });
+        }).until(() -> Math.abs(angle.getDegrees() - getAngle().getDegrees()) < 2).finallyDo(() -> setPercent(0));
     }
+
     @Override
     public void periodic() {
         m_armSim.setInputVoltage(motorPercent * 12.0);

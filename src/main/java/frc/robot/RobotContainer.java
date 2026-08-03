@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
@@ -49,7 +50,7 @@ public class RobotContainer {
 
         Simulation.setup();
         configureBindings();
-        
+
     }
 
     public static Elevator getElevator() {
@@ -73,33 +74,53 @@ public class RobotContainer {
     public static SwerveSubsystem getSwerveSubsystem() {
         return swerveSubsystem;
     }
+
     private final KrakenSubsystem m_krakenSubsystem = new KrakenSubsystem();
+    private boolean isFirstClick = true;
+
     private void configureBindings() {
         driverController.triangle().whileTrue(m_krakenSubsystem.runSpeedCommand(0.5));
         // Runs highGoalCommand if isFarAway() is true, otherwise runs lowGoalCommand
 
-
         driverController.cross().onTrue(Commands.either(
-                Commands.sequence(
-                        Commands.startRun( () ->
-                        elevator.setHeight(0.8),
-                                () -> {
-                                    if (elevator.getHeight() > 0.4) {
-                                        arm.setAngle(Rotation2d.fromDegrees(30.0));
-                                    }
-                                },
-                                elevator, arm
-                        );
+            Commands.sequence(
+                Commands.runOnce(() -> isFirstClick = false),
 
+                Commands.parallel(
+                    elevator.setHeight(0.8),
+                    Commands.sequence(
+                        Commands.waitUntil(() -> elevator.getHeight() > 0.4),
+                        arm.setAngle(Rotation2d.fromDegrees(30))
+                    )
+                )
+            ),
+            Commands.sequence(
+                Commands.runOnce(() -> isFirstClick = true),
 
+                arm.setAngle(Rotation2d.fromDegrees(0)),
+                arm.setAngle(Rotation2d.fromDegrees(30)),
 
+                Commands.parallel(
+                    elevator.setHeight(0.2),
+                    arm.setAngle(Rotation2d.fromDegrees(-90))
+                )
+            ),
+            () -> isFirstClick
+        ));
 
-
-
+//        driverController.cross().onTrue(Commands.either(
+//                Commands.sequence(
+//                        Commands.startRun( () ->
+//                        elevator.setHeight(0.8),
+//                                () -> {
+//                                    if (elevator.getHeight() > 0.4) {
+//                                        arm.setAngle(Rotation2d.fromDegrees(30.0));
+//                                    }
+//                                },
+//                                elevator, arm
+//                        );
     }
 
-
-// דוגמה: כשלוחצים על כפתור cross בשלט, המנוע ירוץ ב-50% כוח. כשעוזבים - הוא יעצור אוטומטית!
 
     public void controllerPeriodic() {
         driverController.periodic();

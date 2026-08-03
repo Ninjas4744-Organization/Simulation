@@ -41,12 +41,14 @@ public class Elevator extends SubsystemBase {
         return Commands.run(() -> {
             //System.out.println("Elevator worked");
             setPercent(pid.calculate(getHeight(), height));
-        });
+        }).until(() -> Math.abs(height - getHeight()) < 0.05).finallyDo(() -> setPercent(0));
     }
+
     public void logError() {
         SmartDashboard.putNumber("Elevator/error", pid.getError() );
         SmartDashboard.putNumber("Elevator/ErrorRate", pid.getErrorDerivative());
     }
+
     public void setPercent(double percent) {
         this.motorPercent = MathUtil.clamp(percent, -1.0, 1.0);
     }
