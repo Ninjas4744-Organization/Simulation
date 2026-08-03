@@ -33,15 +33,19 @@ public class Arm extends SubsystemBase {
         0.0
     );
 
+    private PIDController pidArm = new PIDController(1, 0.2,0);
+    private Rotation2d goal = Rotation2d.kZero;
+
     public Arm() {
         pidArm.setIZone(4);
     }
 
-    PIDController pidArm = new PIDController(1, 0.2,0);
-
-
     public Rotation2d getAngle() {
         return Rotation2d.fromRadians(m_armSim.getAngleRads());
+    }
+
+    public boolean atGoal() {
+        return Math.abs(goal.getDegrees() - getAngle().getDegrees()) < 2;
     }
 
     public void setPercent(double percent) {
@@ -49,14 +53,13 @@ public class Arm extends SubsystemBase {
     }
 
     public Command setAngle(Rotation2d angle) {
-        return Commands.run(() -> {
-           // System.out.println("Arm worked");
-            setPercent(pidArm.calculate(getAngle().getRadians(), angle.getRadians()));
-        }).until(() -> Math.abs(angle.getDegrees() - getAngle().getDegrees()) < 2).finallyDo(() -> setPercent(0));
+        return Commands.runOnce(() -> goal = angle);
     }
 
     @Override
     public void periodic() {
+        setPercent(pidArm.calculate(getAngle().getRadians(), goal.getRadians()));
+
         m_armSim.setInputVoltage(motorPercent * 12.0);
         m_armSim.update(0.02);
 

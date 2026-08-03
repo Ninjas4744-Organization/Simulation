@@ -32,16 +32,19 @@ public class Elevator extends SubsystemBase {
         0
     );
 
+    private PIDController pid = new PIDController(7.5, 0.01, 0.5);
+    private double goal = 0;
+
     public double getHeight() {
         return m_elevatorSim.getPositionMeters();
     }
-    PIDController pid = new PIDController(7.5, 0.01, 0.5);
+
+    public boolean atGoal() {
+        return Math.abs(goal - getHeight()) < 0.05;
+    }
 
     public Command setHeight(double height) {
-        return Commands.run(() -> {
-            //System.out.println("Elevator worked");
-            setPercent(pid.calculate(getHeight(), height));
-        }).until(() -> Math.abs(height - getHeight()) < 0.05).finallyDo(() -> setPercent(0));
+        return Commands.runOnce(() -> goal = height);
     }
 
     public void logError() {
@@ -55,6 +58,8 @@ public class Elevator extends SubsystemBase {
 
     @Override
     public void periodic() {
+        setPercent(pid.calculate(getHeight(), goal));
+
         // Apply motor output (converted to voltage, max 12V)
         m_elevatorSim.setInputVoltage(motorPercent * 12.0);
 

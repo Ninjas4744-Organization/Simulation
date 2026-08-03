@@ -86,41 +86,25 @@ public class RobotContainer {
             Commands.sequence(
                 Commands.runOnce(() -> isFirstClick = false),
 
-                Commands.parallel(
-                    elevator.setHeight(0.8),
-                    Commands.sequence(
-                        Commands.waitUntil(() -> elevator.getHeight() > 0.4),
-                        arm.setAngle(Rotation2d.fromDegrees(30))
-                    )
-                )
+                elevator.setHeight(0.8),
+                Commands.waitUntil(() -> elevator.getHeight() > 0.4),
+                arm.setAngle(Rotation2d.fromDegrees(30))
             ),
             Commands.sequence(
                 Commands.runOnce(() -> isFirstClick = true),
 
                 arm.setAngle(Rotation2d.fromDegrees(0)),
-                arm.setAngle(Rotation2d.fromDegrees(30)),
+                Commands.waitUntil(() -> arm.atGoal()),
 
-                Commands.parallel(
-                    elevator.setHeight(0.2),
-                    arm.setAngle(Rotation2d.fromDegrees(-90))
-                )
+                arm.setAngle(Rotation2d.fromDegrees(30)),
+                Commands.waitUntil(() -> arm.atGoal()),
+
+                elevator.setHeight(0.2),
+                arm.setAngle(Rotation2d.fromDegrees(-90))
             ),
             () -> isFirstClick
         ));
-
-//        driverController.cross().onTrue(Commands.either(
-//                Commands.sequence(
-//                        Commands.startRun( () ->
-//                        elevator.setHeight(0.8),
-//                                () -> {
-//                                    if (elevator.getHeight() > 0.4) {
-//                                        arm.setAngle(Rotation2d.fromDegrees(30.0));
-//                                    }
-//                                },
-//                                elevator, arm
-//                        );
     }
-
 
     public void controllerPeriodic() {
         driverController.periodic();
