@@ -1,7 +1,9 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.NinjasLogger;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
@@ -9,8 +11,6 @@ import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.*;
-import org.ironmaple.simulation.SimulatedArena;
-import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
     private LoggedCommandController driverController;
@@ -25,13 +25,8 @@ public class RobotContainer {
     private static SwerveSubsystem swerveSubsystem;
 
     public RobotContainer() {
-        if (!GeneralConstants.kRobotMode.isReplay()) {
-            driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
-//            operatorController = new LoggedCommandController("Operator", new LoggedCommandControllerIOPS5(GeneralConstants.kOperatorControllerPort));
-        } else {
-            driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
-//            operatorController = new LoggedCommandController("Operator", new LoggedCommandControllerIO() {});
-        }
+        driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
+//        operatorController = new LoggedCommandController("Operator", new LoggedCommandControllerIOPS5(GeneralConstants.kOperatorControllerPort));
 
         swerveSubsystem = new SwerveSubsystem(true, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
         RobotStateBase.set(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
@@ -42,6 +37,7 @@ public class RobotContainer {
         hood = new Hood();
         turret = new Turret();
         indexer = new Indexer();
+        new ExampleSubsystem(true);
 
         Simulation.setup();
         configureBindings();
@@ -96,6 +92,10 @@ public class RobotContainer {
 
     public void periodic() {
         Simulation.periodic();
+
+        if ((Timer.getFPGATimestamp() - Math.floor(Timer.getFPGATimestamp())) < 0.02) {
+            NinjasLogger.logEvent("event i guess");
+        }
     }
 
     public Command getAutonomousCommand() {

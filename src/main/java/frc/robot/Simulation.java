@@ -4,17 +4,18 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.lib.NinjasLib.NinjasLogger;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.subsystems.Shooter;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
-import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
-import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -24,34 +25,34 @@ public class Simulation {
     private static final List<GamePieceProjectile> balls = new ArrayList<>();
 
     // ---- Mechanism2D Visualization Layout ----
-    private static LoggedMechanism2d mechCanvas;
+    private static Mechanism2d mechCanvas;
 
     // Elevator & Arm (Nested)
-    private static LoggedMechanismRoot2d robotBaseRoot;
-    private static LoggedMechanismLigament2d elevatorVisual;
-    private static LoggedMechanismLigament2d armVisual;
+    private static MechanismRoot2d robotBaseRoot;
+    private static MechanismLigament2d elevatorVisual;
+    private static MechanismLigament2d armVisual;
 
     // Turret & Hood (Separated horizontally to prevent overlapping)
-    private static LoggedMechanismRoot2d shooterBaseRoot;
-    private static LoggedMechanismLigament2d hoodVisual;
+    private static MechanismRoot2d shooterBaseRoot;
+    private static MechanismLigament2d hoodVisual;
 
     public static void setup() {
         balls.clear();
 
         // 1. Initialize Canvas (Width x Height)
-        mechCanvas = new LoggedMechanism2d(5.0, 5.0);
+        mechCanvas = new Mechanism2d(5.0, 5.0);
 
         // 2. Setup Elevator Root on the left side of the canvas
         robotBaseRoot = mechCanvas.getRoot("RobotBase", 2.5, 0);
 
         // Elevator extends straight up (90 degrees)
         elevatorVisual = robotBaseRoot.append(
-            new LoggedMechanismLigament2d("ElevatorTower", 0.5, 90, 6, new Color8Bit(Color.kSteelBlue))
+            new MechanismLigament2d("ElevatorTower", 0.5, 90, 6, new Color8Bit(Color.kSteelBlue))
         );
 
         // Arm is nested to the elevator. It moves along with the elevator tower.
         armVisual = elevatorVisual.append(
-            new LoggedMechanismLigament2d("ArmLinkage", 0.6, 0, 6, new Color8Bit(Color.kOrangeRed))
+            new MechanismLigament2d("ArmLinkage", 0.6, 0, 6, new Color8Bit(Color.kOrangeRed))
         );
 
         // 3. Setup Turret/Shooter Root on the right side of the canvas to avoid overlapping visual lines
@@ -59,7 +60,7 @@ public class Simulation {
 
         // Hood mounted onto the turret
         hoodVisual = shooterBaseRoot.append(
-            new LoggedMechanismLigament2d("HoodAngle", 0.4, 20, 4, new Color8Bit(Color.kYellow))
+            new MechanismLigament2d("HoodAngle", 0.4, 20, 4, new Color8Bit(Color.kYellow))
         );
     }
 
@@ -113,7 +114,7 @@ public class Simulation {
 
         // Log outputs to AdvantageScope
         Pose3d[] ballPoses = balls.stream().map(GamePieceProjectile::getPose3d).toArray(Pose3d[]::new);
-        Logger.recordOutput("Simulation/Balls", ballPoses);
-        Logger.recordOutput("Simulation/Mechanism2d", mechCanvas);
+        NinjasLogger.log("Simulation/Balls", ballPoses);
+        SmartDashboard.putData("Simulation/Mechanism2d", mechCanvas);
     }
 }

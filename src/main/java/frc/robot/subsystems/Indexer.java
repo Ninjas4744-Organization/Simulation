@@ -2,8 +2,8 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.NinjasLib.NinjasLogger;
 import frc.robot.Simulation;
-import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
     private double motorPercent = 0.0;
@@ -29,6 +29,6 @@ public class Indexer extends SubsystemBase {
             ballTravelProgress = 0.0;
         }
 
-        Logger.recordOutput("Indexer/Progress", ballTravelProgress);
+        NinjasLogger.log("Indexer/Progress", ballTravelProgress);
     }
 }

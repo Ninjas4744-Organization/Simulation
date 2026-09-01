@@ -19,6 +19,7 @@ import frc.lib.NinjasLib.localization.vision.VisionConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveControllerConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveModuleConstants;
+import frc.robot.Robot;
 import frc.robot.RobotState;
 import org.json.simple.parser.ParseException;
 
@@ -65,7 +66,7 @@ public class SubsystemConstants {
         );
 
         /* Limits */
-        kSwerve.limits.maxSpeed = GeneralConstants.kRobotMode.isSim() ? 5.145 : 4.7;
+        kSwerve.limits.maxSpeed = Robot.isSimulation() ? 5.145 : 4.7;
         kSwerve.limits.maxAngularVelocity = 8.5;
         kSwerve.limits.speedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
@@ -76,7 +77,7 @@ public class SubsystemConstants {
 
         /* Modules */
         double wheelRadius = 0.049;
-        kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
+        kSwerve.modules.openLoop = Robot.isSimulation();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.statorCurrentLimit = 100;
         kSwerve.modules.driveMotorConstants.real.base.supplyCurrentLimit = 60;
@@ -127,7 +128,6 @@ public class SubsystemConstants {
         /* Special */
         kSwerve.special.enableOdometryThread = false;
         kSwerve.special.odometryThreadFrequency = 50;
-        kSwerve.special.isReplay = GeneralConstants.kRobotMode.isReplay();
         kSwerve.special.robotStartPose = new Pose2d(2, 4, Rotation2d.kZero);
         kSwerve.special.CANBus = new CANBus("Swerve Bus");
         kSwerve.special.enableAutoLock = false;
@@ -166,7 +166,6 @@ public class SubsystemConstants {
         );
 
         kVision.fieldLayoutGetter = FieldConstants::getFieldLayoutWithIgnored;
-        kVision.isReplay = GeneralConstants.kRobotMode.isReplay();
         kVision.robotPoseSupplier = () -> RobotState.get().getRobotPose();
     }
 }
